@@ -1,0 +1,20 @@
+li.candidate input { margin-right: 1em; width: 2em; height: 2em; }
+ul { list-style-type: none; }
+
+body { 
+	max-width: 1080px; 
+	margin: 0 auto !important; 
+	float: none !important; 
+	background-color: gray;
+}
+
+div.body_container {
+	background-color: white;
+	padding: 2em;
+	-webkit-box-shadow: 2px 5px 15px 5px rgba(0,0,0,0.5); 
+	box-shadow: 2px 5px 15px 5px rgba(0,0,0,0.5);
+}
+
+input[type=submit] { width: 15em; height: 2em; font-size: 150%; }
+
+p.submit { margin-top: 4em; }
