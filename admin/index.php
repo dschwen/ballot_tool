@@ -16,6 +16,14 @@ $db = new mysqli("127.0.0.1", $db_cred['user'], $db_cred['pass'], "voting");
 if ($db->connect_error) {
 	die('Connect Error (' . $db->connect_errno . ') ' . $db->connect_error);
 }
+
+// toggle open/closed
+if (isset($_GET['toggle'])) {
+	$eid = intval($_GET['toggle']);
+        if (!$db->query('UPDATE elections SET open = NOT open WHERE ele_id=' . $eid)) {
+                die('Failed to toggle election');
+        }
+}
 ?>
 
 <h2>Select an election</h2>
@@ -25,7 +33,12 @@ if ($db->connect_error) {
 // get election titles
 $result = $db->query('SELECT * FROM elections');
 while ($obj = $result->fetch_object()) {
-	echo '<li><a href="results.php?eid=' . $obj->ele_id . '">' . $obj->title . '</a></li>';
+	echo '<li><b><a href="results.php?eid=' . $obj->ele_id . '">' . $obj->title . '</a></b> (<a href="?toggle=' . $obj->ele_id . '">';
+	if ($obj->open) 
+		echo "close";
+	else
+		echo "open";
+	echo '</a> this election)</li>';
 }
 $result->close();
 ?>
