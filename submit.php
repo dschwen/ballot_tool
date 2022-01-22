@@ -26,6 +26,21 @@ if ($db->connect_error) {
 $eid = intval($_GET['eid']);
 $token = $db->real_escape_string($_GET['token']);
 
+// check if election is open
+$result = $db->query('SELECT title, open FROM elections WHERE ele_id=' . $eid);
+if ($result->num_rows != 1) {
+	$db->close();
+	votefail('Did not find specified election.');
+}
+$result->data_seek(0);
+$data = $result->fetch_array();
+$elname = $data[0];
+$open = $data[1];
+if (!$open) {
+	$db->close();
+	votefail('The election "' . $elname . '" is not open for voting yet.');
+}
+
 // lock the token table
 if (!$db->query('LOCK TABLES valid_tokens WRITE, candidates READ, positions READ, votes WRITE')) {
 	votefail('Unable to cast ballot, please try again. [E1]');

@@ -13,6 +13,19 @@ function get_election_title($db, $eid) {
 	return $election;
 }
 
+function is_election_open($db, $eid) {
+	// get election state
+	$result = $db->query('SELECT open FROM elections WHERE ele_id=' . $eid);
+	if ($result->num_rows != 1) {
+		die('Election not found');
+	}
+	$result->data_seek(0);
+	$open = $result->fetch_array()[0];
+	$result->close();
+
+	return $open;
+}
+
 function build_ballot($db, $eid) {
 	// Obtain a list of positions and the respective candidates
 	$result = $db->query('SELECT cand_id, candidates.pos_id AS pos_id, candidates.title AS ctitle, positions.title AS ptitle FROM candidates, positions WHERE candidates.pos_id = positions.pos_id AND ele_id = ' . $eid);

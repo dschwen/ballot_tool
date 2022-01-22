@@ -22,6 +22,7 @@ $token = $db->real_escape_string($_GET['token']);
 
 // get election title
 $election = get_election_title($db, $eid);
+$election_open = is_election_open($db, $eid);
 ?>
 
 <title><?= $election ?></title>
@@ -34,7 +35,7 @@ $election = get_election_title($db, $eid);
 <?php
 // check if token is still valid
 $result = $db->query('SELECT * FROM valid_tokens WHERE token="' . $token . '" AND used=false AND ele_id=' . $eid);
-if ($result->num_rows != 1) {
+if ($result->num_rows != 1 && $election_open) {
 	?>
 
 	<p>The token '<?= $token ?>' is not valid for this election or has already been used to cast a vote.</p>
@@ -57,13 +58,18 @@ $result->close();
 
 // Output the ballot
 build_ballot($db, $eid);
-?>
 
-<p class="submit">Your vote is <b>final</b>. Once you press submit no further changes can be made!</p>
-<input type="submit"/>
-<input type="hidden" name="eid" value="<?= $eid ?>"/>
-<input type="hidden" name="token" value="<?= $token ?>"/>
-</form>
+if ($election_open) 
+{
+?>
+	<p class="submit">Your vote is <b>final</b>. Once you press submit no further changes can be made!</p>
+	<input type="submit"/>
+	<input type="hidden" name="eid" value="<?= $eid ?>"/>
+	<input type="hidden" name="token" value="<?= $token ?>"/>
+	</form>
+<?php
+}
+?>
 
 </div>
 </body>
