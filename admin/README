@@ -1,0 +1,3 @@
+
+generate_tokens.sh
+for token in `cat token.txt`; do echo "insert into valid_tokens (ele_id, token) values (1, \"$token\");" | mysql voting ; done

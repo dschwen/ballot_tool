@@ -17,49 +17,68 @@ if ($db->connect_error) {
 	die('Connect Error (' . $db->connect_errno . ') ' . $db->connect_error);
 }
 
-$eid = intval($_GET['eid']);
+// message
+$message = '';
 
-// administer election
-$result = $db->query('SELECT title FROM elections WHERE ele_id=' . $eid);
-if ($result->num_rows != 1) {
-	die('Election not found');
-}
-$result->data_seek(0);
-$election = $result->fetch_array()[0];
-$result->close();
-?>
+//
+// process commands 
+//
 
-<h1><?= $election ?></h2>
-
-<?php
-// Obtain a list of positions and the respective candidates
-$result = $db->query('SELECT candidates.cand_id, candidates.pos_id AS pos_id, candidates.title AS ctitle, positions.title AS ptitle, COUNT(votes.cand_id) AS votes ' .
-		     'FROM positions, candidates ' .
-		     'LEFT JOIN votes ON votes.cand_id = candidates.cand_id ' .
-		     'WHERE candidates.pos_id = positions.pos_id AND ele_id=' . $eid .' GROUP BY cand_id ORDER BY pos_id');
-
-$cpos = 0;
-while ($obj = $result->fetch_object()) {
-	if ($cpos != $obj->pos_id)
-	{
-		if ($cpos != 0) {
-			echo "</ul>";
-		}
-
-		$cpos = $obj->pos_id;
-		echo "<h2>" . $obj->ptitle . "</h2><ul>";
+if (isset($_GET['add_el'])) {
+	if (!$db->query('INSERT INTO elections (title) VALUES ("' . $db->real_escape_string($_GET['add_el']) . '")')) {
+		die('Failed to create new election');
 	}
-	?>
-
-	<li class="candidate">
-	<b><?= $obj->votes ?></b> <?= $obj->ctitle ?>
-	</li>
-
-	<?php
+	$message .= '<h3>Election added.</h3>';
 }
+
+if (isset($_GET['del_el'])) {
+	if (!$db->query('DELETE FROM elections WHERE ele_id=' . intval($_GET['del_el']))) {
+		votefail('Unable to cast ballot, please try again. [E2]');
+	}
+	$message .= '<h3>Election deleted.</h3>';
+}
+
+if (isset($_GET['cln_el'])) {
+	$db->query('START TRANSACTION');
+
+	if (!$db->query('DELETE FROM elections WHERE ele_id=' . intval($_GET['del_el']))) {
+		votefail('Unable to cast ballot, please try again. [E2]');
+	}
+
+	$db->query('COMMIT');
+	$message .= '<h3>Election cloned.</h3>';
+}
+
+
+if (isset($_GET['tkn_el']) && isset($_GET['n_tkn'])) {
+	$tkn_el = intval($_GET['tkn_el']);
+	$n_tkn = intval($_GET['n_tkn']);
+
+	$message .= '<h3>' . $n_tkn . ' tokens added to election.</h3><p>';
+
+	//$db->query('START TRANSACTION');
+	for ($i=0; $i < $n_tkn; ++$i) {
+
+		// construct token
+		$list = '01234567890abcdefghijklmnopqrstuvwxyz_';
+		$max = strlen($list) -1;
+		$tkn = '';
+		for ($j = 0; $j < 10; ++$j) {
+			$tkn .= $list[random_int(0, $max)];
+		}
+		$message .= $tkn . '<br/>';
+
+		//if (!$db->query('DELETE FROM elections WHERE ele_id=' . intval($_GET['del_el']))) {
+		//	votefail('Unable to cast ballot, please try again. [E2]');
+		//}
+	}
+
+	$message .= '</p>';
+}
+
+echo $message;
 ?>
 
-</ul>
 </div>
 </body>
 </html>
