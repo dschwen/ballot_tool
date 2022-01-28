@@ -72,6 +72,26 @@ if ($election_open)
 ?>
 
 </div>
+<script>
+
+document.addEventListener("click", function(ev){
+	// which position did the user click on
+	var pos = ev.target.dataset.pos;
+	if (pos === undefined) return;
+
+	var checked = document.querySelectorAll('input[data-pos="' + pos + '"]:checked').length;
+	var item1 = document.querySelector('input[data-pos="' + pos + '"]');
+	var list = item1.parentElement.parentElement;
+
+	if (checked < item1.dataset.min || checked > item1.dataset.max) {
+		list.classList.add('invalid');
+	} else {
+		list.classList.remove('invalid');
+	}
+
+});
+
+</script>
 </body>
 </html>
 

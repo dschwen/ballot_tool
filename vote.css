@@ -17,4 +17,10 @@ div.body_container {
 
 input[type=submit] { width: 15em; height: 2em; font-size: 150%; }
 
+h2 { margin-top: 2em; }
 p.submit { margin-top: 4em; }
+
+ul.invalid { 
+	color: red;
+	border: 2px dotted red;
+}
