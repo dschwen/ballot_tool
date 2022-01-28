@@ -85,11 +85,25 @@ while ($obj = $result->fetch_object()) {
 	}
 }
 
+// Obtain a list of positions and the permitted min/max amount of valid options
+$result = $db->query('SELECT positions.pos_id AS pos_id, positions.title AS title, min, max, COUNT(positions.pos_id) AS max2 FROM positions LEFT JOIN candidates ON candidates.pos_id = positions.pos_id WHERE ele_id='. $eid .' GROUP BY candidates.pos_id');
+if (!$result) {
+	$db->close();
+	votefail('Unable to cast ballot, please try again. [E3]');
+}
+
 // check ballot validity
-foreach ($count as $pos => $nvotes) {
-	if ($nvotes > 1) {
+while ($obj = $result->fetch_object()) {
+	$pos = intval($obj->pos_id);
+	$title = $obj->title;
+	$min = intval($obj->min);
+	$max1 = intval($obj->max);
+	$max2 = intval($obj->max2);
+	$max = min($max1, $max2);
+
+	if ($count[$pos] < $min || $count[$pos] > $max) {
 		$db->query('ROLLBACK');
-		votefail('More than one option was selected for one of the ballot items. Please try again. [E5]');
+		votefail('An incorrect number of options (' . $count[$pos] . ') was selected for the ballot line "' . $title . '". Between ' . $min . ' and ' . $max . ' options can be selected. Please try again. [E5]');
 	}
 }
 
