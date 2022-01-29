@@ -27,9 +27,20 @@ if ($result->num_rows != 1) {
 $result->data_seek(0);
 $election = $result->fetch_array()[0];
 $result->close();
+
+// count votes cast
+$result = $db->query('SELECT COUNT(*) FROM valid_tokens WHERE used=true AND ele_id=' . $eid);
+if ($result->num_rows != 1) {
+	die('Unable to get number of votes cast');
+}
+$result->data_seek(0);
+$votes_cast = $result->fetch_array()[0];
+$result->close();
+
 ?>
 
 <h1><?= $election ?></h2>
+<p><?= $votes_cast ?> votes have been cast.</p>
 
 <?php
 // Obtain a list of positions and the respective candidates
